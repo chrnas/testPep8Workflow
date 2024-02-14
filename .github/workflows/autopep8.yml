@@ -1,24 +1,28 @@
-name: autopep8
-on: pull_request
+name: Auto-format code
+
+on:
+  pull_request:
+    branches:
+      - master
+
 jobs:
-  autopep8:
-    # Check if the PR is not from a fork
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.head_ref }}
-      - name: autopep8
-        id: autopep8
-        uses: peter-evans/autopep8@v2
-        with:
-          args: --exit-code --recursive --in-place --aggressive --aggressive .
-      - name: Commit autopep8 changes
-        if: steps.autopep8.outputs.exit-code == 2
+          python-version: 3.8
+      - name: Install autopep8
+        run: pip install autopep8
+      - name: Run autopep8
+        run: autopep8 --in-place --recursive .
+      - name: Commit and push changes
         run: |
-          git config --global user.name 'Peter Evans'
-          git config --global user.email 'peter-evans@users.noreply.github.com'
-          git commit -am "Automated autopep8 fixes"
+          git config --global user.name 'Your Name'
+          git config --global user.email 'your-email@example.com'
+          git add .
+          git commit -m "Automated code formatting"
           git push
